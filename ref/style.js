@@ -6,5 +6,8 @@ var COLORS = {
     "white" :       "#ffffff",
     "test":         "#f252e8",
     "black":        "#000000",
-    
+    "category":     "#e4b990",
+    "bg_color":     "#ffdcc4",
+    "card_color":   "#594c70",
+      
 }

@@ -4,8 +4,9 @@ const SCENES = {
 }
 
 var currentScene = "GAME"
-const IMG = {}
-const FONT = {}
+const IMG = {};
+const FONT = {};
+const SFX = {};
 var isMouseClicked = false;
 var isMouseDown = false;
 
@@ -25,6 +26,24 @@ function preload() {
     for (let k = 0; k < FONT_LIST.length; k++) {
         FONT[FONT_LIST[k]] = loadFont("./assets/fonts/" + FONT_LIST[k] + ".ttf");
     }
+    for (let k = 0; k < SFX_LIST.length; k++) {
+        const newSFX = new Audio('./assets/sfx/' + SFX_LIST[k] + ".mp3")
+        SFX[SFX_LIST[k]] = newSFX;
+    }
+
+    // fill in any missing 
+    for (let level of WORDS) {
+        for (let word in level) {
+            if (IMG[word] == null) {
+                IMG[word] = loadImage("./assets/images/_missing.png");
+            }
+            if (SFX[word] == null) {
+                const newSFX = new Audio("./assets/sfx/_missing.mp3");
+                SFX[word] = newSFX;
+            }
+        }
+    }
+    
 }
 function draw() {
     

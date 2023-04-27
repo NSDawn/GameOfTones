@@ -7,6 +7,7 @@ class ScreenElement {
         this.visible = false;
         this.isDragging = false;
         this.isSubDragging = false;
+        this.isDraggable = true;
         this.isContained = false;
         this._mouseshift = new v2(0, 0);
     }
@@ -23,7 +24,7 @@ class ScreenElement {
             }
         }
         // dragging around
-        if (isMouseDown) {
+        if (isMouseDown && this.isDraggable) {
             if (this.isMouseHovering && !this.isDragging && !isMouseHolding) {
                 this.isDragging = true
                 isMouseHolding = true;

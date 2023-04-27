@@ -1,11 +1,6 @@
-let test_cardA = new Card("xhua-21", new v2(10, 10));
-let test_cardB = new Card("beku-21", new v2(30, 30));
-let test_cardC = new Card("xhile-21", new v2(50, 30));
-let test_cardD = new Card("lage-11", new v2(50, 30));
-let test_cardE = new Card("ya-ado11", new v2(50, 30));
-let test_cardF = new Card("beye-11", new v2(50, 30));
-
 let level = 1; // 1-indexed!!
+let max_level = level;
+
 
 //let test_cont = new Container( new v2(50, 50),  new v2(10, 10), "Phoneme")
 let isMouseHolding = false;
@@ -13,22 +8,54 @@ let mouseHolding = null;
 let isMouseHovering = false;
 let mouseHovering = null;
 
+
 let screenObjects = {
-    "Card": [],
+    "Container": [],
+    "Button": [],
+    "Card": [],  
 }
+
+let _categories = {}
+
+// screen elements that will need to be referenced globally
+let glossContainer = new Container(new v2(228, 19), new v2(20, 24), "Card");
+let resetButton = new Button("reset", new v2(210, 12), new v2(16, 16));
+let helpButton = new Button("help", new v2(210, 30), new v2(16, 16));
+let checkButton = new Button("check", new v2(210, 96), new v2(16, 16));
+let rightButton = new Button("right", new v2(228, 114), new v2(16, 16))
+let leftButton = new Button("left", new v2(210, 114), new v2(16, 16))
 
 class sceneGame {
     init () {
-        screenObjects["Card"].push(test_cardA);
-        screenObjects["Card"].push(test_cardB);
-        screenObjects["Card"].push(test_cardC);
-        screenObjects["Card"].push(test_cardD);
-        screenObjects["Card"].push(test_cardE);
-        screenObjects["Card"].push(test_cardF);
         loadLevel(level);
+        screenObjects["Button"].push(resetButton);
+        screenObjects["Button"].push(helpButton);
+        screenObjects["Button"].push(checkButton);
+        screenObjects["Button"].push(rightButton);
+        screenObjects["Button"].push(leftButton);
     }
     draw () {
+        let i;
+        image(IMG["bg"], 0, 0)
+        
+
         noSmooth()
+
+        // write titles of categories to the screen
+        i = 1;
+        const categoriesLength = Object.keys(_categories).length
+        
+        for (let category in _categories) {
+            i++;
+            const yPos = (i * ((CANVAS_SIZE.y /SCALE) * (3/2)) / (categoriesLength + 2) ) - ((CANVAS_SIZE.y /SCALE)* (3/8)) - 16; 
+            fill(COLORS["category"]); rect(CANVAS_SIZE.x / SCALE/ 6, yPos, 5 *CANVAS_SIZE.x / SCALE/ 8, CANVAS_SIZE.y / SCALE/ 6)
+            
+            stroke(COLORS["bg_color"]); strokeWeight(1);
+            textAlign(LEFT, CENTER); textSize(CANVAS_SIZE.x/128); textFont(FONT["MPLUS_Bold"]); fill(COLORS["black"]);
+            text(CATEGORIES[category]["display_name"], CANVAS_SIZE.x / SCALE/ 6, yPos- CANVAS_SIZE.y/256);
+            noStroke();
+        }
+
         isMouseHovering = false;
         mouseHovering = null;
         // pre-check if the mouse is holding on to anything
@@ -36,12 +63,11 @@ class sceneGame {
         mouseHolding = null;
         for (let key in screenObjects) {
             for (let obj of screenObjects[key]) {
-                obj.base.disabled = false
+                // obj.disabled = false
                 if (obj.isDragging) {
                     isMouseHolding = true;
                     mouseHolding = obj;
                 }
-                obj.base.isSubDragging = false;
             };
         }
         
@@ -70,90 +96,113 @@ class sceneGame {
         // render, show them to screen
         for (let key in screenObjects) {
             for (let obj of screenObjects[key]) {
-                if (obj.isSubDragging) {continue}; // will render subDragged blocks in the next code block
                 obj.render();
             };
         };
         
+        // run GlossContainer
+        if (glossContainer.content !== null) {
+            helpButton.disabled = false;
+        } else {
+            helpButton.disabled = true;
+        }
+
+        // run reset button
+        if (resetButton.isClicked) {
+            loadLevel(level);
+        }
+        
+        // run help button
+        if (helpButton.isHeld) {
+            textAlign(CENTER, CENTER); textSize(4); textFont(FONT["MPLUS_Bold"]); fill(COLORS["black"]);
+            text(CATEGORIES[WORDS[level -1][glossContainer.content.id]["category"]]["display_name"], 229, 51);
+        }
+        
+        // run check button
+        if (checkButton.isClicked) {
+            let f = true
+            for (let container of screenObjects["Container"]) {
+                if (container.content == null) {continue;}
+                if (container.content.category != container.category) {
+                    container.content.pos = container.content._home_pos.copy()
+                    container.content.isContained = false;
+                    container.content = null;
+                    f = false
+                }
+            }
+            if (f) {
+                max_level = min(WORDS.length, level + 1);
+            }
+        }
+
+        // run left and right buttons
+        rightButton.disabled = (level >= max_level);
+        leftButton.disabled = !(level > 1);
+
+        
+        if (rightButton.isClicked) {
+            level += 1;
+            loadLevel(level);
+        }
+        if (leftButton.isClicked) {
+            level -= 1;
+            loadLevel(level);
+        }
+        console.log(level)
+
+
         fill(color(COLORS.black));
         ellipse(mouse_pos.x, mouse_pos.y, 16 / SCALE)
         fill(color((mouseHolding == null) ? COLORS.white : COLORS.test));
         ellipse(mouse_pos.x, mouse_pos.y, 10 / SCALE)
     }
-
-    
 }
-
-const PHONEMES = {
-    "": {
-        "id":"",
-        "place": ["", ""],
-        "manner":["", ""],
-        "voice": true,
-        "":"",
-    },
-    "p": {
-        "id" : "p",
-        "place":["labial", ""],
-        "manner":["consonant", "plosive"],
-        "voice": false,
-    },
-    "t": {
-        "id":"t",
-        "place": ["coronal",""],
-        "manner":["consonant", "plosive"],
-        "voice": false,
-    },
-    "c": {
-        "id":"c",
-        "place": ["palatal", ""],
-        "manner":["consonant", "plosive"],
-        "voice": false,
-    },
-    "k": {
-        "id":"k",
-        "place": ["velar", ""],
-        "manner":["consonant", "plosive"],
-        "voice": false,
-    },
-    "b": {
-        "id" : "b",
-        "place":["labial", ""],
-        "manner":["consonant", "plosive"],
-        "voice": true,
-    },
-    "d": {
-        "id":"d",
-        "place": ["coronal",""],
-        "manner":["consonant", "plosive"],
-        "voice": true,
-    },
-    "ɟ": {
-        "id":"ɟ",
-        "place": ["palatal", ""],
-        "manner":["consonant", "plosive"],
-        "voice": true,
-    },
-    "g": {
-        "id":"g",
-        "place": ["velar", ""],
-        "manner":["consonant", "plosive"],
-        "voice": true,
-    },
-
-}
-
 
 function loadLevel(in_level) {
     CANVAS_SIZE.x / 8;
 
+    screenObjects["Container"] = [];
     screenObjects["Card"] = [];
+    _categories = {};
 
-    let i = 0;
+    // append cards for each word in the level.
+    let i = 1;
+    const wordsLength = Object.keys(WORDS[in_level - 1]).length
     for (let word in WORDS[in_level - 1]) {
         i ++;
-        console.log(SCALE)
-        let newCard = new Card(word,  new v2(CANVAS_SIZE.x / SCALE / 16,  10), in_level - 1);
-        screenObjects["Card"].push(newCard);
+        let yPos = (i * ((CANVAS_SIZE.y /SCALE)* (7/8)) / (wordsLength+2)  ) - (18) + ((CANVAS_SIZE.y /SCALE)* (1/16));
+        let xPos = (CANVAS_SIZE.x / SCALE / 32) + ((i % 2) * (CANVAS_SIZE.x / SCALE / 32))
+
+        let newCard = new Card(word,  new v2(xPos,  yPos), in_level - 1);
+        screenObjects["Card"].push(newCard); 
     }
+
+    // go through the words, and count how many of each category there are.
+    for (let word of screenObjects["Card"]) {
+        if (_categories[word.category] == null) {
+            _categories[word.category] = []; 
+        }
+        _categories[word.category].push(word);
+    }
+
+    // draw the containers for each category
+    i = 1;
+    const categoriesLength = Object.keys(_categories).length
+    for (let category in _categories) {
+        i ++;
+        j = 1;
+        const yPos = (i * ((CANVAS_SIZE.y /SCALE) * (3/2)) / (categoriesLength + 2) ) - ((CANVAS_SIZE.y /SCALE)* (3/8)) - 12; 
+        const wordLength = _categories[category].length
+        for (let word in _categories[category]) {
+            j ++;
+            const xPos = (j * ((CANVAS_SIZE.x /SCALE) * (7/8)) / (wordLength + 2) ) - (12)  ;
+            let newCont = new Container(new v2(xPos, yPos), new v2(20, 24), "Card", category)
+            screenObjects["Container"].push(newCont);
+        }
+    }
+
+    // right side container
+    glossContainer = new Container(new v2(228, 19), new v2(20, 24), "Card");
+    glossContainer.isGlossContainer = true;
+    screenObjects["Container"].push(glossContainer);
 }
