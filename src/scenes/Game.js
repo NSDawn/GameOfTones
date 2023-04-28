@@ -99,6 +99,10 @@ class sceneGame {
                 obj.render();
             };
         };
+
+        // // // // // // // // // // // // // // // 
+        // BUTTONS AND STUFF                      //
+        // // // // // // // // // // // // // // // 
         
         // run GlossContainer
         if (glossContainer.content !== null) {
@@ -109,10 +113,14 @@ class sceneGame {
 
         // run reset button
         if (resetButton.isClicked) {
+            SFX["button-default"].play();
             loadLevel(level);
         }
-        
+
         // run help button
+        if (helpButton.isClicked){
+            SFX["button-default"].play();
+        }
         if (helpButton.isHeld) {
             textAlign(CENTER, CENTER); textSize(4); textFont(FONT["MPLUS_Bold"]); fill(COLORS["black"]);
             text(CATEGORIES[WORDS[level -1][glossContainer.content.id]["category"]]["display_name"], 229, 51);
@@ -122,16 +130,19 @@ class sceneGame {
         if (checkButton.isClicked) {
             let f = true
             for (let container of screenObjects["Container"]) {
-                if (container.content == null) {continue;}
+                if (container.content == null) {f = false; continue;}
                 if (container.content.category != container.category) {
                     container.content.pos = container.content._home_pos.copy()
                     container.content.isContained = false;
                     container.content = null;
-                    f = false
+                    f = false;
                 }
             }
             if (f) {
                 max_level = min(WORDS.length, level + 1);
+                SFX["button-correct"].play();
+            } else {
+                SFX["button-incorrect"].play();
             }
         }
 
@@ -141,20 +152,16 @@ class sceneGame {
 
         
         if (rightButton.isClicked) {
+            SFX["button-default"].play();
             level += 1;
             loadLevel(level);
         }
         if (leftButton.isClicked) {
+            SFX["button-default"].play();
             level -= 1;
             loadLevel(level);
         }
-        console.log(level)
 
-
-        fill(color(COLORS.black));
-        ellipse(mouse_pos.x, mouse_pos.y, 16 / SCALE)
-        fill(color((mouseHolding == null) ? COLORS.white : COLORS.test));
-        ellipse(mouse_pos.x, mouse_pos.y, 10 / SCALE)
     }
 }
 
@@ -166,9 +173,14 @@ function loadLevel(in_level) {
     _categories = {};
 
     // append cards for each word in the level.
-    let i = 1;
     const wordsLength = Object.keys(WORDS[in_level - 1]).length
-    for (let word in WORDS[in_level - 1]) {
+    let wordsArr = [];
+    for (let word in WORDS[in_level - 1]) {  // this creates an array and then randomizes it 
+        wordsArr.push(word)
+    }
+    wordsArr = wordsArr.sort((a, b) => 0.5 - Math.random());
+    let i = 1;
+    for (let word of wordsArr) {
         i ++;
         let yPos = (i * ((CANVAS_SIZE.y /SCALE)* (7/8)) / (wordsLength+2)  ) - (18) + ((CANVAS_SIZE.y /SCALE)* (1/16));
         let xPos = (CANVAS_SIZE.x / SCALE / 32) + ((i % 2) * (CANVAS_SIZE.x / SCALE / 32))

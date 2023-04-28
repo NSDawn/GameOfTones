@@ -47,7 +47,6 @@ function preload() {
 }
 function draw() {
     
-    noCursor();
     background(220);
     SCALE = CANVAS_SIZE.x/256
     scale(SCALE);
