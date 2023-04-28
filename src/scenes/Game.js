@@ -1,8 +1,6 @@
 let level = 1; // 1-indexed!!
 let max_level = level;
 
-
-//let test_cont = new Container( new v2(50, 50),  new v2(10, 10), "Phoneme")
 let isMouseHolding = false;
 let mouseHolding = null;
 let isMouseHovering = false;
@@ -130,7 +128,10 @@ class sceneGame {
         if (checkButton.isClicked) {
             let f = true
             for (let container of screenObjects["Container"]) {
-                if (container.content == null) {f = false; continue;}
+                if (container.content == null) {
+                    if (!container.isGlossContainer) {f = false} 
+                    ; continue;
+                }
                 if (container.content.category != container.category) {
                     container.content.pos = container.content._home_pos.copy()
                     container.content.isContained = false;
