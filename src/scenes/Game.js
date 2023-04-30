@@ -219,3 +219,18 @@ function loadLevel(in_level) {
     glossContainer.isGlossContainer = true;
     screenObjects["Container"].push(glossContainer);
 }
+
+ 
+
+
+(undefined/null+[])[+[]]
+// > N
+
+(true == "true") , (true == "1")
+// > true, false
+
+""+!![]
+// 'true'
+
+([]+{})[+!![]]
+// "o"
